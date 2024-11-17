@@ -112,13 +112,51 @@ action:
             value_template: >
               {%- set today = now().weekday() -%}
               {%- set days = [day_monday, day_tuesday, day_wednesday, day_thursday, day_friday, day_saturday, day_sunday] -%}
-              {{ days[today] and state_attr(grid_area_var, 'current_price')|float < (state_attr(grid_area_var,'today')|slice(0, look_ahead_var|int)|sort)[cheap_hours_var|int] }}
+              {%- set current_price = state_attr(grid_area_var, 'current_price') | float -%}
+              {%- set today_prices_raw = state_attr(grid_area_var, 'today') -%}
+
+              {%- if current_price is not none and today_prices_raw is not none and today_prices_raw | length > 0 -%}
+                {%- if today_prices_raw | length >= look_ahead_var -%}
+                  {%- set filtered_prices = today_prices_raw[:look_ahead_var] -%}
+                {%- else -%}
+                  {%- set filtered_prices = today_prices_raw -%}
+                {%- endif -%}
+                {%- set sorted_prices = filtered_prices | sort -%}
+
+                {%- if sorted_prices | length > cheap_hours_var -%}
+                  {%- set target_price = sorted_prices[cheap_hours_var] -%}
+                  {{ days[today] and current_price < target_price }}
+                {%- else -%}
+                  false
+                {%- endif -%}
+              {%- else -%}
+                false
+              {%- endif -%}
         sequence: !input cheap
       - conditions:
           - condition: template
             value_template: >
               {%- set today = now().weekday() -%}
               {%- set days = [day_monday, day_tuesday, day_wednesday, day_thursday, day_friday, day_saturday, day_sunday] -%}
-              {{ days[today] and state_attr(grid_area_var, 'current_price')|float > (state_attr(grid_area_var,'today')|slice(0, look_ahead_var|int)|sort)[cheap_hours_var|int] }}
+              {%- set current_price = state_attr(grid_area_var, 'current_price') | float -%}
+              {%- set today_prices_raw = state_attr(grid_area_var, 'today') -%}
+
+              {%- if current_price is not none and today_prices_raw is not none and today_prices_raw | length > 0 -%}
+                {%- if today_prices_raw | length >= look_ahead_var -%}
+                  {%- set filtered_prices = today_prices_raw[:look_ahead_var] -%}
+                {%- else -%}
+                  {%- set filtered_prices = today_prices_raw -%}
+                {%- endif -%}
+                {%- set sorted_prices = filtered_prices | sort -%}
+
+                {%- if sorted_prices | length > cheap_hours_var -%}
+                  {%- set target_price = sorted_prices[cheap_hours_var] -%}
+                  {{ days[today] and current_price > target_price }}
+                {%- else -%}
+                  false
+                {%- endif -%}
+              {%- else -%}
+                false
+              {%- endif -%}
         sequence: !input expensive
     default: []
