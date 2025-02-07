@@ -128,9 +128,9 @@ action:
               {%- set days = [day_monday, day_tuesday, day_wednesday, day_thursday, day_friday, day_saturday, day_sunday] -%}
               {%- set current_price = state_attr(grid_area_var, 'current_price') | float -%}
               {%- set today_prices_raw = state_attr(grid_area_var, 'today') -%}
-              {%- set now_time = now().time() -%}  # Set `now_time` to the current time
-              {%- set start = strptime(start_time, '%H:%M:%S').time() -%}  # Parse start_time as a time object
-              {%- set end = strptime(end_time, '%H:%M:%S').time() -%}  # Parse end_time as a time object
+              {%- set now_time = now().time() -%}
+              {%- set start = strptime(start_time, '%H:%M:%S').time() -%}
+              {%- set end = strptime(end_time, '%H:%M:%S').time() -%}
 
               {%- if current_price is not none and today_prices_raw is not none and today_prices_raw | length > 0 -%}
                 {%- if today_prices_raw | length >= look_ahead_var -%}
